@@ -24,7 +24,7 @@
     justify-content: center;
     align-items: center;
     position: relative;
-    z-index: 2; /* above fireworks */
+    z-index: 2;
   }
 
   .top img {
@@ -48,7 +48,7 @@
     align-items: center;
     gap: 20px;
     position: relative;
-    z-index: 2; /* above fireworks */
+    z-index: 2;
   }
 
   button {
@@ -60,33 +60,22 @@
     transition: 0.3s ease;
   }
 
-  #yesBtn {
-    background-color: #ff2e63;
-    color: white;
-  }
-
-  #noBtn {
-    background-color: #333;
-    color: white;
-  }
+  #yesBtn { background-color: #ff2e63; color: white; }
+  #noBtn  { background-color: #333; color: white; }
 
   canvas {
     position: fixed;
     top: 0;
     left: 0;
     pointer-events: none;
-
-    /* Put fireworks behind everything */
     z-index: 1;
-
-    /* We'll fade it in/out */
     opacity: 0;
     transition: opacity 1s ease;
   }
 
   @keyframes bounce {
     from { transform: translateY(0px); }
-    to { transform: translateY(-15px); }
+    to   { transform: translateY(-15px); }
   }
 
   @keyframes fadeInMsg {
@@ -100,7 +89,7 @@
 
 <div class="top">
   <h1>Jy mekeer n Valentine</h1>
-  <img id="mainImage" src="finger.gif" alt="Finger Pointing">
+  <img id="mainImage" src="finger.gif.GIF" alt="Finger Pointing">
 </div>
 
 <div class="bottom">
@@ -114,10 +103,8 @@
 <canvas id="fireworks"></canvas>
 
 <script>
-  // ====== CHANGE THESE TO MATCH YOUR REPO FILENAMES EXACTLY ======
-  const FINGER_FILE = "finger.gif";   // e.g. "finger.gif" OR "finger.GIF"
-  const REVEAL_FILE = "reveal.jpg";   // e.g. "reveal.jpg" OR "Reveal.JPG"
-  // =============================================================
+  const FINGER_FILE = "finger.gif.GIF";
+  const REVEAL_FILE = "reveal.JPG";
 
   let noClickCount = 0;
   const noBtn = document.getElementById("noBtn");
@@ -126,7 +113,6 @@
   const topSection = document.querySelector(".top");
   const bottomSection = document.querySelector(".bottom");
 
-  // Make sure initial image uses the configured filename
   mainImage.src = FINGER_FILE;
 
   noBtn.addEventListener("click", function() {
@@ -145,7 +131,6 @@
   yesBtn.addEventListener("click", function() {
     bottomSection.style.display = "none";
 
-    // Fade out then swap image
     mainImage.style.transition = "opacity 0.8s ease";
     mainImage.style.opacity = "0";
 
@@ -154,7 +139,6 @@
       mainImage.style.opacity = "1";
     }, 800);
 
-    // Celebration text
     const message = document.createElement("h1");
     message.innerText = "I had a feeling you were going to say YES 😏❤️";
     message.style.color = "white";
@@ -166,7 +150,6 @@
     startFireworks(3500);
   });
 
-  // ===== FIREWORKS =====
   const canvas = document.getElementById("fireworks");
   const ctx = canvas.getContext("2d");
 
@@ -184,8 +167,7 @@
   function createFirework(x, y) {
     for (let i = 0; i < 50; i++) {
       particles.push({
-        x,
-        y,
+        x, y,
         r: 2,
         color: `hsl(${Math.random() * 360}, 100%, 60%)`,
         vx: (Math.random() - 0.5) * 8,
@@ -196,20 +178,16 @@
   }
 
   function startFireworks(durationMs = 3500) {
-    // show canvas (behind content)
     canvas.style.opacity = "1";
 
-    // spawn bursts
     intervalId = setInterval(() => {
       createFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5);
     }, 450);
 
-    // stop and fade out
     setTimeout(() => {
       clearInterval(intervalId);
       intervalId = null;
 
-      // allow particles to finish then fade out canvas
       setTimeout(() => {
         canvas.style.opacity = "0";
       }, 800);
@@ -223,7 +201,6 @@
     animating = true;
 
     function loop() {
-      // Clear fully so we don't darken the page
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       for (let i = particles.length - 1; i >= 0; i--) {
