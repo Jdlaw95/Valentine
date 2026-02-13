@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jy mekeer n Valentine 💖</title>
 <style>
-body {
+  body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
@@ -15,192 +15,240 @@ body {
     background: linear-gradient(to bottom, #ff758c, #ff7eb3);
     overflow: hidden;
     text-align: center;
-}
+  }
 
-.top {
+  .top {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-}
+    position: relative;
+    z-index: 2; /* above fireworks */
+  }
 
-.top img {
+  .top img {
     max-width: 50%;
     max-height: 50%;
     border-radius: 10px;
     animation: bounce 1s infinite alternate;
-}
+  }
 
-h1 {
+  h1 {
     color: white;
     font-size: 2rem;
     margin-bottom: 10px;
-}
+  }
 
-.bottom {
+  .bottom {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 20px;
-}
+    position: relative;
+    z-index: 2; /* above fireworks */
+  }
 
-button {
+  button {
     padding: 15px 35px;
     font-size: 1.3rem;
     border: none;
     border-radius: 50px;
     cursor: pointer;
     transition: 0.3s ease;
-}
+  }
 
-#yesBtn {
+  #yesBtn {
     background-color: #ff2e63;
     color: white;
-}
+  }
 
-#noBtn {
+  #noBtn {
     background-color: #333;
     color: white;
-}
+  }
 
-canvas {
+  canvas {
     position: fixed;
     top: 0;
     left: 0;
     pointer-events: none;
-}
 
-@keyframes bounce {
+    /* Put fireworks behind everything */
+    z-index: 1;
+
+    /* We'll fade it in/out */
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+
+  @keyframes bounce {
     from { transform: translateY(0px); }
     to { transform: translateY(-15px); }
-}
+  }
+
+  @keyframes fadeInMsg {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
 </style>
 </head>
+
 <body>
 
 <div class="top">
-    <h1>Jy mekeer n Valentine</h1>
-    <img id="mainImage" src="finger.gif.GIF" alt="Finger Pointing">
+  <h1>Jy mekeer n Valentine</h1>
+  <img id="mainImage" src="finger.gif" alt="Finger Pointing">
 </div>
 
 <div class="bottom">
-    <h2>Do you have one?</h2>
-    <div>
-        <button id="yesBtn">YES ❤️</button>
-        <button id="noBtn">NO 😢</button>
-    </div>
+  <h2 style="color:white; margin:0;">Do you have one?</h2>
+  <div>
+    <button id="yesBtn">YES ❤️</button>
+    <button id="noBtn">NO 😢</button>
+  </div>
 </div>
 
 <canvas id="fireworks"></canvas>
 
 <script>
-let noClickCount = 0;
-const noBtn = document.getElementById("noBtn");
-const yesBtn = document.getElementById("yesBtn");
-const mainImage = document.getElementById("mainImage");
-const topSection = document.querySelector(".top");
-const bottomSection = document.querySelector(".bottom");
+  // ====== CHANGE THESE TO MATCH YOUR REPO FILENAMES EXACTLY ======
+  const FINGER_FILE = "finger.gif";   // e.g. "finger.gif" OR "finger.GIF"
+  const REVEAL_FILE = "reveal.jpg";   // e.g. "reveal.jpg" OR "Reveal.JPG"
+  // =============================================================
 
-noBtn.addEventListener("click", function() {
+  let noClickCount = 0;
+  const noBtn = document.getElementById("noBtn");
+  const yesBtn = document.getElementById("yesBtn");
+  const mainImage = document.getElementById("mainImage");
+  const topSection = document.querySelector(".top");
+  const bottomSection = document.querySelector(".bottom");
+
+  // Make sure initial image uses the configured filename
+  mainImage.src = FINGER_FILE;
+
+  noBtn.addEventListener("click", function() {
     noClickCount++;
-    let shrink = 1 - (noClickCount * 0.2);
-    let grow = 1 + (noClickCount * 0.3);
+    const shrink = Math.max(0.2, 1 - (noClickCount * 0.2));
+    const grow = 1 + (noClickCount * 0.3);
 
     noBtn.style.transform = "scale(" + shrink + ")";
     yesBtn.style.transform = "scale(" + grow + ")";
 
     if (noClickCount >= 4) {
-        noBtn.style.display = "none";
+      noBtn.style.display = "none";
     }
-});
+  });
 
-yesBtn.addEventListener("click", function() {
-    // Hide buttons
+  yesBtn.addEventListener("click", function() {
     bottomSection.style.display = "none";
 
-    // Fade main GIF out and swap to reveal image
-    mainImage.style.transition = "opacity 1s";
+    // Fade out then swap image
+    mainImage.style.transition = "opacity 0.8s ease";
     mainImage.style.opacity = "0";
 
     setTimeout(() => {
-        mainImage.src = "reveal.jpg";
-        mainImage.style.opacity = "1";
-    }, 1000);
+      mainImage.src = REVEAL_FILE;
+      mainImage.style.opacity = "1";
+    }, 800);
 
-    // Add celebration text
+    // Celebration text
     const message = document.createElement("h1");
     message.innerText = "I had a feeling you were going to say YES 😏❤️";
     message.style.color = "white";
     message.style.marginTop = "20px";
     message.style.opacity = "0";
-    message.style.animation = "fadeIn 2s forwards";
+    message.style.animation = "fadeInMsg 1.3s forwards";
     topSection.appendChild(message);
 
-    // Add keyframes dynamically
-    const style = document.createElement("style");
-    style.innerHTML = `
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: scale(0.8);}
-            100% { opacity: 1; transform: scale(1);}
-        }
-    `;
-    document.head.appendChild(style);
+    startFireworks(3500);
+  });
 
-    startFireworks();
-});
+  // ===== FIREWORKS =====
+  const canvas = document.getElementById("fireworks");
+  const ctx = canvas.getContext("2d");
 
-// FIREWORKS CODE
-const canvas = document.getElementById("fireworks");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
 
-let particles = [];
+  let particles = [];
+  let intervalId = null;
+  let animating = false;
 
-function createFirework(x, y) {
+  function createFirework(x, y) {
     for (let i = 0; i < 50; i++) {
-        particles.push({
-            x: x,
-            y: y,
-            radius: 2,
-            color: `hsl(${Math.random()*360},100%,60%)`,
-            speedX: (Math.random()-0.5)*8,
-            speedY: (Math.random()-0.5)*8,
-            life: 100
-        });
+      particles.push({
+        x,
+        y,
+        r: 2,
+        color: `hsl(${Math.random() * 360}, 100%, 60%)`,
+        vx: (Math.random() - 0.5) * 8,
+        vy: (Math.random() - 0.5) * 8,
+        life: 90
+      });
     }
-}
+  }
 
-function startFireworks() {
-    setInterval(() => {
-        createFirework(Math.random() * canvas.width, Math.random() * canvas.height/2);
-    }, 500);
+  function startFireworks(durationMs = 3500) {
+    // show canvas (behind content)
+    canvas.style.opacity = "1";
+
+    // spawn bursts
+    intervalId = setInterval(() => {
+      createFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5);
+    }, 450);
+
+    // stop and fade out
+    setTimeout(() => {
+      clearInterval(intervalId);
+      intervalId = null;
+
+      // allow particles to finish then fade out canvas
+      setTimeout(() => {
+        canvas.style.opacity = "0";
+      }, 800);
+    }, durationMs);
+
     animate();
-}
+  }
 
-function animate() {
-    requestAnimationFrame(animate);
-    ctx.fillStyle = "rgba(0,0,0,0.2)"; // faded effect
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+  function animate() {
+    if (animating) return;
+    animating = true;
 
-    particles.forEach((p, index) => {
-        p.x += p.speedX;
-        p.y += p.speedY;
+    function loop() {
+      // Clear fully so we don't darken the page
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
         p.life--;
 
         ctx.beginPath();
-        ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
         ctx.fill();
 
-        if (p.life <= 0) {
-            particles.splice(index,1);
-        }
-    });
-}
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+
+      if (particles.length > 0 || intervalId) {
+        requestAnimationFrame(loop);
+      } else {
+        animating = false;
+      }
+    }
+
+    requestAnimationFrame(loop);
+  }
 </script>
 
 </body>
