@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Jy mekeer n Valentine 💖</title>
+
 <style>
   body {
     margin: 0;
@@ -32,6 +33,7 @@
     max-height: 50%;
     border-radius: 10px;
     animation: bounce 1s infinite alternate;
+    transition: opacity 0.8s ease;
   }
 
   h1 {
@@ -57,12 +59,14 @@
     border: none;
     border-radius: 50px;
     cursor: pointer;
-    transition: 0.3s ease;
+    transition: transform 0.25s ease;
+    will-change: transform;
   }
 
   #yesBtn { background-color: #ff2e63; color: white; }
   #noBtn  { background-color: #333; color: white; }
 
+  /* Fireworks behind everything */
   canvas {
     position: fixed;
     top: 0;
@@ -89,7 +93,7 @@
 
 <div class="top">
   <h1>Jy mekeer n Valentine</h1>
-  <img id="mainImage" src="finger.gif.GIF" alt="Finger Pointing">
+  <img id="mainImage" src="finger.gif.GIF" alt="Finger Pointing" />
 </div>
 
 <div class="bottom">
@@ -103,44 +107,52 @@
 <canvas id="fireworks"></canvas>
 
 <script>
+  // Match your repo filenames exactly:
   const FINGER_FILE = "finger.gif.GIF";
   const REVEAL_FILE = "reveal.JPG";
 
-  let noClickCount = 0;
-  const noBtn = document.getElementById("noBtn");
   const yesBtn = document.getElementById("yesBtn");
+  const noBtn = document.getElementById("noBtn");
   const mainImage = document.getElementById("mainImage");
   const topSection = document.querySelector(".top");
   const bottomSection = document.querySelector(".bottom");
 
   mainImage.src = FINGER_FILE;
 
-  noBtn.addEventListener("click", function() {
-    noClickCount++;
-    const shrink = Math.max(0.2, 1 - (noClickCount * 0.2));
-    const grow = 1 + (noClickCount * 0.3);
+  // --- NEW: YES shrinks each click until invisible ---
+  let yesClickCount = 0;
 
-    noBtn.style.transform = "scale(" + shrink + ")";
-    yesBtn.style.transform = "scale(" + grow + ")";
+  yesBtn.addEventListener("click", function () {
+    yesClickCount++;
 
-    if (noClickCount >= 4) {
-      noBtn.style.display = "none";
+    const shrink = Math.max(0, 1 - yesClickCount * 0.2);
+    yesBtn.style.transform = `scale(${shrink})`;
+
+    if (shrink <= 0.05) {
+      yesBtn.style.display = "none";
     }
   });
 
-  yesBtn.addEventListener("click", function() {
+  // --- NEW: NO triggers the next part (message + image reveal + fireworks) ---
+  let didProceed = false;
+
+  noBtn.addEventListener("click", function () {
+    if (didProceed) return;
+    didProceed = true;
+
+    // Hide the whole bottom section (buttons)
     bottomSection.style.display = "none";
 
-    mainImage.style.transition = "opacity 0.8s ease";
+    // Fade out then swap image
     mainImage.style.opacity = "0";
-
     setTimeout(() => {
       mainImage.src = REVEAL_FILE;
       mainImage.style.opacity = "1";
     }, 800);
 
+    // Message change
     const message = document.createElement("h1");
-    message.innerText = "I had a feeling you were going to say YES 😏❤️";
+    message.innerText = "Well in that case 😏❤️";
     message.style.color = "white";
     message.style.marginTop = "20px";
     message.style.opacity = "0";
@@ -150,6 +162,7 @@
     startFireworks(3500);
   });
 
+  // ===== FIREWORKS (behind content + fades out) =====
   const canvas = document.getElementById("fireworks");
   const ctx = canvas.getContext("2d");
 
@@ -181,7 +194,10 @@
     canvas.style.opacity = "1";
 
     intervalId = setInterval(() => {
-      createFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5);
+      createFirework(
+        Math.random() * canvas.width,
+        Math.random() * canvas.height * 0.5
+      );
     }, 450);
 
     setTimeout(() => {
